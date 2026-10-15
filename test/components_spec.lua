@@ -53,6 +53,26 @@ btv.test.describe("bemtvi-line.components", function()
     btv.test.expect(cell.text).to_be("deep.txt")
   end)
 
+  -- A buffer opened by ABSOLUTE path under the editor's cwd still renders relative:
+  -- the cwd prefix (from `btv.cwd()`) is stripped off the stored name.
+  btv.test.it("filename strips the cwd off an absolute buffer name", function(t)
+    local dir = btv.test.tempdir()
+    btv.await(btv.fs.mkdir(dir .. "/abs"))
+    btv.await(btv.fs.write(dir .. "/abs/full.txt", "hi\n"))
+    line.setup({ options = { globalstatus = true }, sections = { lualine_c = { "filename" } } })
+    t:feed(":cd " .. dir .. "<CR>")
+    t:feed(":edit " .. dir .. "/abs/full.txt<CR>")
+    t:wait_for(function()
+      return btv.buf.name(btv.buf.current()):find("full%.txt$")
+    end)
+    btv.test.expect(btv.buf.name(btv.buf.current())).to_be(dir .. "/abs/full.txt")
+    local cell = components.get("filename").provide({
+      buf = btv.buf.current(),
+      win = btv.win.current(),
+    }, { path = 1 })
+    btv.test.expect(cell.text).to_be("abs/full.txt")
+  end)
+
   btv.test.it("encoding shows the file encoding", function(t)
     line.setup({ options = { globalstatus = true }, sections = { lualine_x = { "encoding" } } })
     nudge(t)
@@ -70,7 +90,7 @@ btv.test.describe("bemtvi-line.components", function()
       sections = { lualine_b = { "diagnostics" } },
     })
     nudge(t)
-    local ns = vim.api.nvim_create_namespace("btvline_diag_test")
+    local ns = btv.ns.create("btvline_diag_test")
     btv.diagnostic.set(ns, 0, {
       { lnum = 0, col = 0, severity = 1, message = "an error" },
       { lnum = 1, col = 0, severity = 2, message = "a warning" },

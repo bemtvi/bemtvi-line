@@ -68,7 +68,7 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
   -- (e.g. catppuccin's mantle vs base). `x` defaults to `c`, so the whole right
   -- half of the active bar follows.
   btv.test.it("auto's fill (c) and inactive sections ride the StatusLine bg, not Normal", function()
-    vim.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
+    btv.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
     btv.hl.define(0, "Normal", { fg = "#cdd6f4", bg = "#1e1e2e" }) -- the document bg
     btv.hl.define(0, "StatusLine", { fg = "#cdd6f4", bg = "#181825" }) -- a darker bar bg
     local pal = themes.derive_auto()
@@ -86,8 +86,8 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
       inactive = { c = { fg = "#6c7086", bg = "#181825" } },
     }
     package.loaded["lualine.themes.faketheme"] = shipped
-    local prev = vim.g.colors_name
-    vim.g.colors_name = "faketheme"
+    local prev = btv.g.colors_name
+    btv.g.colors_name = "faketheme"
     -- Even with distinct highlight groups present, the shipped theme wins.
     btv.hl.define(0, "Normal", { fg = "#ffffff", bg = "#111111" })
     btv.hl.define(0, "StatusLine", { fg = "#ffffff", bg = "#222222" })
@@ -95,11 +95,11 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
     btv.test.expect(pal.normal.a.bg).to_be("#89b4fa")
     btv.test.expect(pal.normal.c.bg).to_be("#181825")
     package.loaded["lualine.themes.faketheme"] = nil
-    vim.g.colors_name = prev
+    btv.g.colors_name = prev
   end)
 
   btv.test.it("auto's inactive bar uses StatusLineNC's faded foreground", function()
-    vim.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
+    btv.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
     btv.hl.define(0, "Normal", { fg = "#cdd6f4", bg = "#1e1e2e" })
     btv.hl.define(0, "StatusLine", { fg = "#cdd6f4", bg = "#181825" }) -- active: bright text
     btv.hl.define(0, "StatusLineNC", { fg = "#45475a", bg = "#181825" }) -- inactive: faded text
@@ -118,7 +118,7 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
   btv.test.it("auto derives every mode accent from the active palette", function(t)
     t:cmd("hi clear")
     t:cmd("colorscheme bemtvi")
-    vim.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
+    btv.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
     local pal = themes.derive_auto()
     btv.test.expect(pal.normal.a.bg).to_be("#61afef") -- One Dark blue
     btv.test.expect(pal.insert.a.bg).to_be("#98c379") -- green
@@ -141,7 +141,7 @@ btv.test.describe("bemtvi-line.theme", function()
     function(t)
       -- The colorscheme may load AFTER setup, or the user switches flavours live; the
       -- bar must re-derive on ColorScheme (real lualine does). Start on synthesis…
-      vim.g.colors_name = "no-shipped-theme-x"
+      btv.g.colors_name = "no-shipped-theme-x"
       btv.hl.define(0, "Normal", { fg = "#cccccc", bg = "#101010" })
       btv.hl.define(0, "StatusLine", { fg = "#cccccc", bg = "#202020" })
       line.setup({
@@ -159,7 +159,7 @@ btv.test.describe("bemtvi-line.theme", function()
       package.loaded["lualine.themes.shipped-x"] = {
         normal = { a = { fg = "#000000", bg = "#89b4fa" }, c = { fg = "#cdd6f4", bg = "#181825" } },
       }
-      vim.g.colors_name = "shipped-x"
+      btv.g.colors_name = "shipped-x"
       btv.autocmd.exec("ColorScheme", {})
       t:wait_for(function()
         return btv.hl.get(0, { name = "lualine_c_normal" }).bg == 0x181825

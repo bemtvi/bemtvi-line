@@ -58,7 +58,7 @@ btv.test.describe("bemtvi-line.searchcount", function()
   btv.test.it("shows nothing with no search pattern", function()
     -- Pure: the `/` register starts empty in a fresh session → no cell.
     local components = require("bemtvi-line.components")
-    if vim.fn.getreg("/") == "" then
+    if btv.reg.get("/") == "" then
       local cell = components.get("searchcount").provide({
         buf = btv.buf.current(),
         win = btv.win.current(),

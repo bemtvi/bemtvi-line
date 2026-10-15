@@ -152,7 +152,7 @@ end
 -- whose one source group happened to be missing. The bar's own surfaces still come
 -- from the StatusLine groups directly, since those ARE the bar.
 function M.derive_auto()
-  local name = vim.g.colors_name
+  local name = btv.g.colors_name
   if type(name) == "string" and name ~= "" then
     local ok, theme = pcall(require, "lualine.themes." .. name)
     if ok and type(theme) == "table" then

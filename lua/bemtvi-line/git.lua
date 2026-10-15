@@ -37,7 +37,7 @@ M.debounce_ms = 120
 
 local function key(buf)
   local name = btv.buf.name(buf)
-  return name ~= "" and name or vim.fn.getcwd()
+  return name ~= "" and name or btv.cwd()
 end
 
 local function dir_of(buf)
@@ -45,7 +45,7 @@ local function dir_of(buf)
   if name ~= "" then
     return name:match("^(.*)/[^/]*$") or "."
   end
-  return vim.fn.getcwd()
+  return btv.cwd()
 end
 
 -- Should this buffer resolve git data at all? Only a real file buffer (`buftype == ""`)

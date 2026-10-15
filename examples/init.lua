@@ -21,7 +21,7 @@
 btv.plugins({
   {
     name = "bemtvi-line",
-    dir = vim.fn.expand("<sfile>:p:h:h"), -- the repo root (this file's grandparent dir)
+    dir = btv.expand("<sfile>:p:h:h"), -- the repo root (this file's grandparent dir)
     config = function()
       require("bemtvi-line").setup({
         options = { theme = "auto" }, -- derive the palette from the active colorscheme

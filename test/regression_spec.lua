@@ -151,14 +151,14 @@ btv.test.describe("bemtvi-line.searchcount (cached)", function()
     t:feed("gg")
     t:feed("/aa<CR>")
     t:wait_for(function()
-      return vim.fn.getreg("/") == "aa"
+      return btv.reg.get("/") == "aa"
     end)
     goto_line(t, 1)
     local scans = components._searchcount_stats.scans
     btv.test.expect(sc.provide({ buf = buf, win = win, focused = true }, {}).text).to_be("[1/2]")
     t:feed("/bb<CR>")
     t:wait_for(function()
-      return vim.fn.getreg("/") == "bb"
+      return btv.reg.get("/") == "bb"
     end)
     goto_line(t, 1)
     -- The text never changed, so the tick is identical — the PATTERN change alone must
@@ -179,7 +179,7 @@ btv.test.describe("bemtvi-line.searchcount (cached)", function()
     t:feed("gg")
     t:feed("/fo+<CR>") -- a PCRE quantifier: three matches. Vim-escaped, it matches none.
     t:wait_for(function()
-      return vim.fn.getreg("/") == "fo+"
+      return btv.reg.get("/") == "fo+"
     end)
     goto_line(t, 1)
     local cell = components.get("searchcount").provide({ buf = buf, win = win, focused = true }, {})
@@ -224,22 +224,22 @@ btv.test.describe("bemtvi-line.compile hygiene", function()
   btv.test.it("restores 'showtabline' when the tabline is configured away", function(t)
     -- An explicit baseline: an earlier test may have left it at 2, which would make the
     -- final assertion pass for the wrong reason.
-    vim.o.showtabline = 1
-    local before = vim.o.showtabline
+    btv.o.showtabline = 1
+    local before = btv.o.showtabline
     line.setup({
       options = { globalstatus = true },
       sections = { lualine_c = { "filename" } },
       tabline = { lualine_a = { { "label", text = "TABBAR" } } },
     })
     nudge(t)
-    btv.test.expect(vim.o.showtabline).to_be(2)
+    btv.test.expect(btv.o.showtabline).to_be(2)
     line.setup({
       options = { globalstatus = true },
       sections = { lualine_c = { "filename" } },
     })
     nudge(t)
-    btv.test.expect(vim.o.tabline).to_be("")
-    btv.test.expect(vim.o.showtabline).to_be(before)
+    btv.test.expect(btv.o.tabline).to_be("")
+    btv.test.expect(btv.o.showtabline).to_be(before)
   end)
 end)
 
@@ -262,7 +262,7 @@ btv.test.describe("bemtvi-line.own-highlight padding", function()
     -- the fetch entry points so nothing can land over the seed mid-test.
     local buf = btv.buf.current()
     local name = btv.buf.name(buf)
-    local k = name ~= "" and name or vim.fn.getcwd()
+    local k = name ~= "" and name or btv.cwd()
     local saved_ensure, saved_schedule = git.ensure, git.schedule
     git.ensure, git.schedule = function() end, function() end
     git._cache[k] = { branch = "b", diff = { added = 12, changed = 0, removed = 1 } }
@@ -308,7 +308,7 @@ btv.test.describe("bemtvi-line.own-highlight padding", function()
       sections = { lualine_b = { "diagnostics" } },
     })
     nudge(t)
-    local ns = vim.api.nvim_create_namespace("btvline_diag_pad_test")
+    local ns = btv.ns.create("btvline_diag_pad_test")
     btv.diagnostic.set(ns, 0, {
       { lnum = 0, col = 0, severity = 1, message = "an error" },
       { lnum = 1, col = 0, severity = 2, message = "a warning" },
@@ -386,7 +386,7 @@ btv.test.describe("bemtvi-line.own-highlight background", function()
     btv.hl.define(0, "DiagnosticWarn", { fg = "#f9e2af" })
     setup_two_tone({ lualine_b = { "diagnostics" } })
     nudge(t)
-    local ns = vim.api.nvim_create_namespace("btvline_diag_bg_test")
+    local ns = btv.ns.create("btvline_diag_bg_test")
     btv.diagnostic.set(ns, 0, {
       { lnum = 0, col = 0, severity = 1, message = "an error" },
       { lnum = 1, col = 0, severity = 2, message = "a warning" },
@@ -443,7 +443,7 @@ btv.test.describe("bemtvi-line.count colours", function()
   btv.test.it("takes a diff count's colour from Added/Changed/Removed", function(t)
     local buf = btv.buf.current()
     local name = btv.buf.name(buf)
-    local k = name ~= "" and name or vim.fn.getcwd()
+    local k = name ~= "" and name or btv.cwd()
     local saved_ensure, saved_schedule = git.ensure, git.schedule
     git.ensure, git.schedule = function() end, function() end
     git._cache[k] = { branch = "b", diff = { added = 1, changed = 2, removed = 3 } }
@@ -482,7 +482,7 @@ btv.test.describe("bemtvi-line.count colours", function()
     btv.hl.define(0, "ErrorMsg", { fg = "#abcdef" }) -- the palette's `red` chain
     setup_two_tone({ lualine_b = { "diagnostics" } })
     nudge(t)
-    local ns = vim.api.nvim_create_namespace("btvline_diag_hue_test")
+    local ns = btv.ns.create("btvline_diag_hue_test")
     btv.diagnostic.set(ns, 0, { { lnum = 0, col = 0, severity = 1, message = "an error" } })
     line.refresh()
     nudge(t)
@@ -559,7 +559,7 @@ btv.test.describe("bemtvi-line.git robustness", function()
     local buf = btv.buf.current()
     git.ensure(buf)
     t:wait_for(function()
-      return git._cache[btv.buf.name(buf) ~= "" and btv.buf.name(buf) or vim.fn.getcwd()] ~= nil
+      return git._cache[btv.buf.name(buf) ~= "" and btv.buf.name(buf) or btv.cwd()] ~= nil
     end)
     local runs = git._stats.runs
     for _ = 1, 10 do

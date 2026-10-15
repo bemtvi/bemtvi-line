@@ -185,7 +185,7 @@ M.register("filename", {
     if name == "" then
       shown = "[No Name]"
     elseif path_mode == 1 then
-      local cwd = vim.fn.getcwd()
+      local cwd = btv.cwd()
       if cwd ~= "" and name:sub(1, #cwd + 1) == cwd .. "/" then
         shown = name:sub(#cwd + 2)
       else
@@ -493,7 +493,7 @@ end
 M.register("searchcount", {
   events = { "CursorMoved", "CursorMovedI" },
   provide = function(ctx, opts)
-    local pattern = vim.fn.getreg("/")
+    local pattern = btv.reg.get("/")
     if not pattern or pattern == "" then
       return nil
     end

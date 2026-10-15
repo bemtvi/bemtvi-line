@@ -821,19 +821,19 @@ local function build_tabline(config)
     -- Capture `'showtabline'` on the way UP only (not on a rebuild that already has a
     -- tabline), or a second setup{} would record our own 2 as the value to restore.
     if not M._tabline_set then
-      M._showtabline = vim.o.showtabline
+      M._showtabline = btv.o.showtabline
     end
-    vim.o.tabline = "%!v:lua.require('bemtvi-line.compile')._tabline()"
-    vim.o.showtabline = 2
+    btv.o.tabline = "%!v:lua.require('bemtvi-line.compile')._tabline()"
+    btv.o.showtabline = 2
     M._tabline_set = true
   else
     M._tabline_cfg = nil
     if M._tabline_set then
-      vim.o.tabline = ""
+      btv.o.tabline = ""
       -- Restore the pre-tabline `'showtabline'`: clearing only `'tabline'` left the bar
       -- forced visible (showtabline = 2) with nothing in it — a wasted screen row.
       if M._showtabline ~= nil then
-        vim.o.showtabline = M._showtabline
+        btv.o.showtabline = M._showtabline
         M._showtabline = nil
       end
       M._tabline_set = false
@@ -882,7 +882,7 @@ function M.build(config)
 
   build_tabline(config)
 
-  vim.o.laststatus = config.options.globalstatus and 3 or 2
+  btv.o.laststatus = config.options.globalstatus and 3 or 2
   -- `separator = ""` disables btv.statusline's own connector spaces: each section
   -- already carries its padding + powerline arrows, so the native leading/inter/
   -- trailing spaces would otherwise show as unstyled (white) gaps in the bar.
