@@ -441,7 +441,7 @@ btv.test.describe("bemtvi-line file-only components", function()
     btv.test.expect(file_bar).to_contain("utf-8")
 
     -- On the view: the name stays, the file-describing three are gone.
-    local vw = open_view(t)
+    open_view(t)
     local bar = t:wait_for(function()
       local s = t:statusline()
       return s:find("ourpane") and s
@@ -457,7 +457,7 @@ btv.test.describe("bemtvi-line file-only components", function()
       sections = { lualine_x = { { "encoding", file_only = false } } },
     })
     nudge(t)
-    local vw = open_view(t)
+    open_view(t)
     local bar = t:wait_for(function()
       local s = t:statusline()
       return s:find("utf%-8") and s
@@ -483,7 +483,7 @@ btv.test.describe("bemtvi-line file-only components", function()
     end)
     btv.test.expect(on_file).to_contain("MYTAG")
 
-    local vw = open_view(t)
+    open_view(t)
     t:wait_for(function()
       return not t:statusline():find("MYTAG")
     end)

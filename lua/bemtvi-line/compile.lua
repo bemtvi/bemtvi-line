@@ -17,7 +17,7 @@
 -- sections take a colour transition group, and every section also re-renders on
 -- `ModeChanged`. A component with its own `color`/`hl` opts out of the section palette.
 
-local config = require("bemtvi-line.config")
+local config_mod = require("bemtvi-line.config")
 local components = require("bemtvi-line.components")
 local git = require("bemtvi-line.git")
 local icons = require("bemtvi-line.icons")
@@ -56,7 +56,7 @@ local SECTION_LETTER = {
 local FILL_SECTION = "c"
 -- The section key lists come from config.lua, the single place they're declared, so a
 -- section can never exist for validation and not for compilation (or vice versa).
-local LEFT, RIGHT, ALL_SECTIONS = config.LEFT, config.RIGHT, config.SECTIONS
+local LEFT, RIGHT, ALL_SECTIONS = config_mod.LEFT, config_mod.RIGHT, config_mod.SECTIONS
 
 -- The segment names of the most recent build (for refresh()/invalidate_all).
 M._active = {}
