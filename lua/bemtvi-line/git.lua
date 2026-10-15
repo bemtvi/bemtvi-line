@@ -111,45 +111,47 @@ function run_fetch(k, file, dir)
     M._active = M._active - 1
     pump()
   end
-  btv.async(function()
-    -- Branch via the native `btv.git.head` (replaces `git rev-parse --abbrev-ref HEAD`).
-    -- A path outside a repo REJECTS (ENOREPO) — swallow it and leave `branch` nil, the
-    -- old "code ~= 0 → no branch" behavior. An unborn HEAD still reports its branch name.
-    local branch
-    local ok_head, head = pcall(btv.await, btv.git.head(dir))
-    if ok_head and head.branch and head.branch ~= "" then
-      branch = head.branch
-    end
-    -- Per-file working-tree-vs-HEAD counts via the native `btv.git.diff_file` (replaces
-    -- `git diff -U0` + the hand-rolled `@@`-hunk parser). It resolves right to
-    -- { added, changed, removed } — the exact shape the components read.
-    local diff
-    if branch and file ~= "" then
-      local ok_diff, d = pcall(btv.await, btv.git.diff_file(dir, file))
-      if ok_diff then
-        diff = d
+  btv
+    .async(function()
+      -- Branch via the native `btv.git.head` (replaces `git rev-parse --abbrev-ref HEAD`).
+      -- A path outside a repo REJECTS (ENOREPO) — swallow it and leave `branch` nil, the
+      -- old "code ~= 0 → no branch" behavior. An unborn HEAD still reports its branch name.
+      local branch
+      local ok_head, head = pcall(btv.await, btv.git.head(dir))
+      if ok_head and head.branch and head.branch ~= "" then
+        branch = head.branch
       end
-    end
-    -- Publish the result FIRST (release the slot, fire on_update) so a slow / failing watch
-    -- setup can never starve the data path of its invalidation.
-    M._cache[k] = { branch = branch, diff = diff }
-    release()
-    if M._on_update then
-      M._on_update()
-    end
-    -- Best-effort: set up (once) a watch on this repo's .git so an external HEAD/index
-    -- change (commit / checkout / stage) refreshes the bar. Any failure is swallowed.
-    -- `btv.git.discover` gives the absolute git-dir (replaces `rev-parse --absolute-git-dir`).
-    if branch then
-      pcall(function()
-        local disc = btv.await(btv.git.discover(dir))
-        ensure_watch(disc.git_dir)
-      end)
-    end
-  end)():catch(function(e)
-    release()
-    btv.notify("bemtvi-line.git: " .. tostring(e), 4)
-  end)
+      -- Per-file working-tree-vs-HEAD counts via the native `btv.git.diff_file` (replaces
+      -- `git diff -U0` + the hand-rolled `@@`-hunk parser). It resolves right to
+      -- { added, changed, removed } — the exact shape the components read.
+      local diff
+      if branch and file ~= "" then
+        local ok_diff, d = pcall(btv.await, btv.git.diff_file(dir, file))
+        if ok_diff then
+          diff = d
+        end
+      end
+      -- Publish the result FIRST (release the slot, fire on_update) so a slow / failing watch
+      -- setup can never starve the data path of its invalidation.
+      M._cache[k] = { branch = branch, diff = diff }
+      release()
+      if M._on_update then
+        M._on_update()
+      end
+      -- Best-effort: set up (once) a watch on this repo's .git so an external HEAD/index
+      -- change (commit / checkout / stage) refreshes the bar. Any failure is swallowed.
+      -- `btv.git.discover` gives the absolute git-dir (replaces `rev-parse --absolute-git-dir`).
+      if branch then
+        pcall(function()
+          local disc = btv.await(btv.git.discover(dir))
+          ensure_watch(disc.git_dir)
+        end)
+      end
+    end)()
+    :catch(function(e)
+      release()
+      btv.notify("bemtvi-line.git: " .. tostring(e), 4)
+    end)
 end
 
 -- do_refresh(buf): run a fetch now, or enqueue it (deduped by key) when at the cap. A key
