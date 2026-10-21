@@ -111,7 +111,7 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
   end)
 
   -- Every mode accent comes from `btv.hl.palette()`, so under the editor's own `bemtvi`
-  -- scheme the whole bar is in One Dark. The regression this guards: the accents used
+  -- scheme the whole bar is in its colours. The regression this guards: the accents used
   -- to read ONE group each (visual←Statement, replace←Error), and a theme that leaves
   -- that group undefined dropped those modes to a hardcoded generic magenta/red that
   -- belonged to no palette at all — which is exactly what `:colorscheme bemtvi` did.
@@ -120,18 +120,20 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
     t:cmd("colorscheme bemtvi")
     btv.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
     local pal = themes.derive_auto()
-    btv.test.expect(pal.normal.a.bg).to_be("#61afef") -- One Dark blue
-    btv.test.expect(pal.insert.a.bg).to_be("#98c379") -- green
-    btv.test.expect(pal.visual.a.bg).to_be("#c678dd") -- purple
-    btv.test.expect(pal.replace.a.bg).to_be("#e06c75") -- red
-    btv.test.expect(pal.command.a.bg).to_be("#d19a66") -- orange
-    btv.test.expect(pal.terminal.a.bg).to_be("#56b6c2") -- cyan
+    -- Each slot is a role (`blue` the function colour, `purple` the keyword colour, …),
+    -- whatever colour the scheme gives it.
+    btv.test.expect(pal.normal.a.bg).to_be("#fb8c3c") -- `blue`: the function orange
+    btv.test.expect(pal.insert.a.bg).to_be("#83a7ea") -- `green`: the string cornflower
+    btv.test.expect(pal.visual.a.bg).to_be("#5fa86c") -- `purple`: the keyword green
+    btv.test.expect(pal.replace.a.bg).to_be("#f08a7e") -- `red`
+    btv.test.expect(pal.command.a.bg).to_be("#f0b35c") -- `orange`: the constant amber
+    btv.test.expect(pal.terminal.a.bg).to_be("#8ed3e3") -- `cyan`: the operator sky
     -- The bar's own surfaces come from the StatusLine groups the scheme defines.
-    btv.test.expect(pal.normal.c.bg).to_be("#21252b")
-    btv.test.expect(pal.normal.a.fg).to_be("#282c34") -- text on an accent = Normal bg
+    btv.test.expect(pal.normal.c.bg).to_be("#18181d")
+    btv.test.expect(pal.normal.a.fg).to_be("#1e1e24") -- text on an accent = Normal bg
     -- The inactive bar rides StatusLineNC, which the built-in scheme now defines.
-    btv.test.expect(pal.inactive.c.fg).to_be("#5c6370")
-    btv.test.expect(pal.inactive.c.bg).to_be("#21252b")
+    btv.test.expect(pal.inactive.c.fg).to_be("#636773")
+    btv.test.expect(pal.inactive.c.bg).to_be("#18181d")
   end)
 end)
 
