@@ -123,7 +123,7 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
     -- Each slot is a role (`blue` the function colour, `purple` the keyword colour, …),
     -- whatever colour the scheme gives it.
     btv.test.expect(pal.normal.a.bg).to_be("#fb8c3c") -- `blue`: the function orange
-    btv.test.expect(pal.insert.a.bg).to_be("#83a7ea") -- `green`: the string cornflower
+    btv.test.expect(pal.insert.a.bg).to_be("#b6d98b") -- `green`: the "added" green
     btv.test.expect(pal.visual.a.bg).to_be("#5fa86c") -- `purple`: the keyword green
     btv.test.expect(pal.replace.a.bg).to_be("#f08a7e") -- `red`
     btv.test.expect(pal.command.a.bg).to_be("#f0b35c") -- `orange`: the constant amber
