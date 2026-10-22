@@ -29,6 +29,21 @@ btv.test.describe("bemtvi-line.components", function()
     btv.test.expect(sl).to_contain("[+]")
   end)
 
+  -- A non-modal session never leaves Insert, so `TextChanged` never fires there: the
+  -- flag rides `BufModifiedSet` and shows while you are still typing.
+  btv.test.it("the [+] flag shows while typing in a non-modal session", function(t)
+    line.setup({ options = { globalstatus = true }, sections = { lualine_c = { "filename" } } })
+    nudge(t)
+    btv.o.nonmodal = true
+    t:feed("hello")
+    local sl = t:wait_for(function()
+      local s = t:statusline()
+      return s:find("%[%+%]") and s
+    end, { message = "no [+] while typing" })
+    btv.test.expect(sl).to_contain("[+]")
+    btv.o.nonmodal = false
+  end)
+
   -- The default `path` is 1 (relative to cwd), not lualine's bare tail: two buffers
   -- named `mod.rs` are indistinguishable by tail alone. `path = 0` still opts back in,
   -- and the 0 must survive the `or`-default (0 is truthy in Lua, so it does).
@@ -297,6 +312,39 @@ btv.test.describe("bemtvi-line.git", function()
     end)
     btv.test.expect(sl).to_contain("testbranch")
     btv.test.expect(sl).to_contain("+1")
+  end)
+
+  btv.test.it("branch + diff render for a file opened in a non-modal session", function(t)
+    local dir = btv.test.tempdir()
+    local function g(...)
+      local r = btv.await(btv.run({ cmd = "git", args = { "-C", dir, ... } }))
+      if r.code ~= 0 then
+        error("git " .. table.concat({ ... }, " ") .. " failed: " .. r.stderr, 0)
+      end
+    end
+    g("init", "-q")
+    g("config", "user.email", "t@example.com")
+    g("config", "user.name", "Test")
+    btv.await(btv.fs.write(dir .. "/a.txt", "one\ntwo\n"))
+    g("add", "a.txt")
+    g("commit", "-q", "-m", "init")
+    g("branch", "-m", "nmbranch")
+    btv.await(btv.fs.write(dir .. "/a.txt", "one\ntwo\nthree\n"))
+
+    line.setup({
+      options = { globalstatus = true },
+      sections = { lualine_b = { "branch", "diff" } },
+    })
+    -- The session rests in Insert, so the file is read while the mode is Insert.
+    btv.o.nonmodal = true
+    btv.cmdline.open("edit " .. dir .. "/a.txt")
+    t:feed("<CR>")
+    local sl = t:wait_for(function()
+      local s = t:statusline()
+      return s:find("nmbranch") and s:find("%+1") and s
+    end, { message = "no branch/diff for the file" })
+    btv.test.expect(sl).to_contain("nmbranch")
+    btv.o.nonmodal = false
   end)
 
   btv.test.it("debounce collapses a burst of refreshes into one git run", function(t)
