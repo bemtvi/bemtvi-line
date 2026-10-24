@@ -135,6 +135,29 @@ btv.test.describe("bemtvi-line.themes (pure)", function()
     btv.test.expect(pal.inactive.c.fg).to_be("#636773")
     btv.test.expect(pal.inactive.c.bg).to_be("#18181d")
   end)
+
+  -- Regression: the middle sections (b, and y, which defaults to it: branch/diff and the
+  -- `Top`/`Bot` progress) rode the StatusLine bg like the fill, so under `bemtvi` they
+  -- read as bare fill and the powerline arrows around them had nothing to draw. They take
+  -- the scheme's raised surface (CursorLine.bg — `surface0`, catppuccin's own lualine `b`).
+  btv.test.it("auto's middle sections (b, y) get a surface distinct from the fill", function(t)
+    t:cmd("hi clear")
+    t:cmd("colorscheme bemtvi")
+    btv.g.colors_name = "no-lualine-theme-here" -- force the synthesis fallback path
+    local pal = themes.normalize(themes.derive_auto())
+    btv.test.expect(pal.normal.b.bg).to_be("#28282f")
+    btv.test.expect(pal.normal.y.bg).to_be("#28282f")
+    btv.test.expect(pal.normal.c.bg).to_be("#18181d")
+  end)
+
+  btv.test.it("auto's b skips a surface that equals the StatusLine bg", function()
+    btv.g.colors_name = "no-lualine-theme-here"
+    btv.hl.define(0, "Normal", { fg = "#cdd6f4", bg = "#1e1e2e" })
+    btv.hl.define(0, "StatusLine", { fg = "#cdd6f4", bg = "#181825" })
+    btv.hl.define(0, "CursorLine", { bg = "#181825" }) -- same as the bar: no contrast
+    btv.hl.define(0, "Visual", { bg = "#45475a" })
+    btv.test.expect(themes.derive_auto().normal.b.bg).to_be("#45475a")
+  end)
 end)
 
 btv.test.describe("bemtvi-line.theme", function()

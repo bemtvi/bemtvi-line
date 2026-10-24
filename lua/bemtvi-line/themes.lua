@@ -170,13 +170,26 @@ function M.derive_auto()
   -- theme's own muted hue / the active bar bg when it leaves NC undefined.
   local nc_fg = hex(statuslinenc.fg, p.muted)
   local nc_bg = hex(statuslinenc.bg, sl_bg)
+  -- The middle sections (b, and y after it) sit one step above the fill, like
+  -- lualine's own `auto` and catppuccin's shipped theme (surface0 over mantle):
+  -- the scheme's raised surface, the first of CursorLine / Visual / Normal whose
+  -- background differs from the bar's. Riding the bar bg instead made them read
+  -- as bare fill, with invisible powerline arrows around them.
+  local mid_bg = sl_bg
+  for _, group in ipairs({ "CursorLine", "Visual", "Normal" }) do
+    local v = hex(hl(group).bg)
+    if v and v ~= sl_bg then
+      mid_bg = v
+      break
+    end
+  end
   local function a(acc)
     return { fg = bg, bg = acc, gui = "bold" }
   end
   return {
     normal = {
       a = a(p.blue),
-      b = { fg = fg, bg = sl_bg },
+      b = { fg = fg, bg = mid_bg },
       -- The fill (c) — and every section defaulting to it (x) — rides the
       -- StatusLine background, NOT Normal, so the bar reads as a distinct strip
       -- rather than blending into the document (e.g. catppuccin's mantle vs base).
