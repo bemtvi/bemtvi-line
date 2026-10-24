@@ -174,7 +174,7 @@ M.register("mode", {
 -- is no relative form to fall back to), and `path = 0` restores the tail.
 M.register("filename", {
   -- `BufModifiedSet` is what moves the [+] flag; it fires the same way in a session that
-  -- never leaves Insert (bemtvi's `'nonmodal'`), where `TextChanged` never does.
+  -- never leaves Insert (bemtvi's `'modeless'`), where `TextChanged` never does.
   events = { "BufEnter", "BufWritePost", "BufModifiedSet", "TextChanged", "InsertLeave" },
   always = true, -- an unnamed buffer still shows "[No Name]"
   provide = function(ctx, opts)
